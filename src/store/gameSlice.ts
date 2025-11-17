@@ -12,6 +12,17 @@ const initialState: GameState = {
     map: [...Array(DEFAULT_SIZE)].map(_ => [...Array(DEFAULT_SIZE)].fill(CellState.Closed)),
 }
 
+const isMine = (state: GameState, cell: Coordinates) => {
+    return state.mines.some((item: Coordinates) => item.x === cell.x && item.y === cell.y)
+}
+
+const randomCell = (state: GameState): Coordinates => {
+    return {
+        x: Math.floor(Math.random() * state.boardWidth),
+        y: Math.floor(Math.random() * state.boardHeight),
+    }
+}
+
 const gameSlice = createSlice({
     name: "game",
     initialState: initialState,
@@ -19,18 +30,35 @@ const gameSlice = createSlice({
         newGame(state: GameState) {
             state.loss = false;
             state.map = [...Array(state.boardHeight)].map(_ => [...Array(state.boardWidth)].fill(CellState.Closed))
+
+            // Mines generation
+            while (state.mines.length < state.minesCount) {
+                let newMine: Coordinates = randomCell(state);
+
+                if (!isMine(state, newMine)) {
+                    state.mines.push(newMine);
+                }
+            }
         },
         open(state, action: PayloadAction<Coordinates>) {
             const { x, y } = action.payload;
-            if (state.mines.some((item: Coordinates) => item.x === x && item.y === y)) {
-                state.loss = true
+
+            if (!state.loss) {
+                if (isMine(state, {x, y})) {
+                    state.loss = true
+                    console.log('loss');
+                }
+                state.map[y][x] = CellState.Opened;
             }
-            state.map[y][x] = CellState.Opened;
         },
         mark(state, action: PayloadAction<Coordinates>) {
             const { x, y } = action.payload;
-            if (state.map[y][x] !== CellState.Opened)
-            state.map[y][x] = state.map[y][x] === CellState.Closed ? CellState.Marked : CellState.Closed;
+
+            if (!state.loss) {
+                if (state.map[y][x] !== CellState.Opened) {
+                    state.map[y][x] = state.map[y][x] === CellState.Closed ? CellState.Marked : CellState.Closed;
+                }
+            }
         },
     }
 });
