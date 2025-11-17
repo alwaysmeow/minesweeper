@@ -1,0 +1,17 @@
+.cell {
+    height: 2rem;
+    width: 2rem;
+    border-radius: 5px;
+
+    &.closed {
+        background-color: #676775;
+    }
+
+    &.opened {
+        background-color: #B3B3C7;
+    }
+
+    &.marked {
+        background-color: #F09090;
+    }
+}
