@@ -14,6 +14,10 @@ const initialState: GameState = {
     ),
 };
 
+const cellExist = (state: GameState, cell: Coordinates) => {
+    return cell.x >= 0 && cell.x < state.boardWidth && cell.y >= 0 && cell.y < state.boardHeight;
+}
+
 const isMine = (state: GameState, cell: Coordinates) => {
     return state.mines.some(
         (item: Coordinates) => item.x === cell.x && item.y === cell.y
@@ -35,6 +39,31 @@ const cellsAround = (coordinates: Coordinates) => {
     }
 
     return cells;
+};
+
+export const getCellValue = (state: GameState, coordinates: Coordinates) => {
+    return cellsAround(coordinates).filter((c) => isMine(state, c)).length;
+};
+
+const recurciveOpen = (state: GameState, coordinates: Coordinates) => {
+    if (
+        cellExist(state, coordinates) &&
+        !state.loss &&
+        state.map[coordinates.y][coordinates.x] === CellState.Closed
+    ) {
+        if (isMine(state, coordinates)) {
+            state.loss = true;
+            console.log("loss");
+        }
+
+        state.map[coordinates.y][coordinates.x] = CellState.Opened;
+        
+        if (!getCellValue(state, coordinates)) {
+            cellsAround(coordinates).forEach((cell) =>
+                recurciveOpen(state, cell)
+            );
+        }
+    }
 };
 
 const randomCell = (state: GameState): Coordinates => {
@@ -65,14 +94,7 @@ const gameSlice = createSlice({
         },
         open(state, action: PayloadAction<Coordinates>) {
             const { x, y } = action.payload;
-
-            if (!state.loss) {
-                if (isMine(state, { x, y })) {
-                    state.loss = true;
-                    console.log("loss");
-                }
-                state.map[y][x] = CellState.Opened;
-            }
+            recurciveOpen(state, { x, y });
         },
         mark(state, action: PayloadAction<Coordinates>) {
             const { x, y } = action.payload;
@@ -92,6 +114,3 @@ const gameSlice = createSlice({
 export default gameSlice.reducer;
 
 export const { newGame, open, mark } = gameSlice.actions;
-export const selectCellValue = (state: GameState, coordinates: Coordinates) => {
-    return cellsAround(coordinates).filter((c) => isMine(state, c)).length;
-};

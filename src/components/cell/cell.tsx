@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import "./cell.scss"
 import { useDispatch, useSelector } from 'react-redux';
-import { mark, open, selectCellValue } from '../../store/gameSlice';
+import { mark, open, getCellValue } from '../../store/gameSlice';
 import { CellState } from '../../types';
 import { RootState } from '../../store/store';
 
@@ -14,7 +14,7 @@ function Cell({x, y}: CellProps) {
     const dispatch = useDispatch();
     const cellState = useSelector((state: RootState) => state.game.map[y][x]);
     const cellValue = useSelector((state: RootState) =>
-        selectCellValue(state.game, {x, y})
+        getCellValue(state.game, {x, y})
     );
 
     const handleLeftClick = useCallback(() => {
