@@ -3,6 +3,10 @@
     width: 2rem;
     border-radius: 5px;
 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
     &.closed {
         background-color: #676775;
     }

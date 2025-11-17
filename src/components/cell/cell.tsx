@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import "./cell.scss"
 import { useDispatch, useSelector } from 'react-redux';
-import { mark, open } from '../../store/gameSlice';
+import { mark, open, selectCellValue } from '../../store/gameSlice';
 import { CellState } from '../../types';
 import { RootState } from '../../store/store';
 
@@ -13,6 +13,9 @@ interface CellProps {
 function Cell({x, y}: CellProps) {
     const dispatch = useDispatch();
     const cellState = useSelector((state: RootState) => state.game.map[y][x]);
+    const cellValue = useSelector((state: RootState) =>
+        selectCellValue(state.game, {x, y})
+    );
 
     const handleLeftClick = useCallback(() => {
         dispatch(open({x, y}));
@@ -30,7 +33,11 @@ function Cell({x, y}: CellProps) {
             + ((cellState === CellState.Marked) ? ' marked' : '')
     }
 
-    return <div className={className()} onClick={handleLeftClick} onContextMenu={handleRightClick} ></div>
+    return (
+        <div className={className()} onClick={handleLeftClick} onContextMenu={handleRightClick} >
+            { cellState === CellState.Opened && cellValue ? cellValue : ''}
+        </div>
+    )
 }
 
 export default Cell;
